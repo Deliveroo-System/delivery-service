@@ -7,4 +7,4 @@ const DeliverySchema = new mongoose.Schema({
   deliveryTime: { type: Date },
 });
 
-module.exports = mongoose.model("Delivery", DeliverySchema);
+module.exports = mongoose.model("Delivery", DeliverySchema); 
