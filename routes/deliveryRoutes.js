@@ -9,7 +9,7 @@ const router = express.Router();
 router.post("/", auth, async (req, res) => {
   try {
     // Find an available driver
-    const driver = await User.findOne({ role: "driver" });
+    const driver = await User.findOne ({ role: "driver" });
 
     if (!driver) {
       return res.status(400).json({ message: "No available drivers" });
