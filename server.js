@@ -2,9 +2,9 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+
 const deliveryRoutes = require("./routes/deliveryRoutes");
-
-
+const driverRoutes = require("./routes/driverRoutes"); // ✅ Import driver routes
 
 const app = express();
 
@@ -13,13 +13,15 @@ app.use(express.json());
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGO_URI, { })
+  .connect(process.env.MONGO_URI, {})
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.error(err));
 
-  //routes
-  app.use("/api/deliveries", deliveryRoutes);
+// Routes
+app.use("/api/deliveries", deliveryRoutes);
+app.use("/api/drivers", driverRoutes); // ✅ Mount driver auth routes
 
+// Root endpoint
 app.get("/", (req, res) => {
   res.send("Delivery Management Service is running...");
 });

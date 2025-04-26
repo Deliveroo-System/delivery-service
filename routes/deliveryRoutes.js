@@ -1,37 +1,28 @@
 const express = require("express");
-const Delivery = require("../models/Delivery");
+const {
+  createDelivery,
+  assignDriver,
+  markAsDelivered,
+  getAllDeliveries,
+  updateDeliveryStatus,
+} = require("../controllers/deliveryController");
+const authMiddleware = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-// Create a new delivery order
-router.post("/", async (req, res) => {
-  try {
-    const newDelivery = new Delivery(req.body);
-    await newDelivery.save();
-    res.status(201).json(newDelivery);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+// Create a new delivery
+router.post("/", authMiddleware, createDelivery);
+
+// Assign a driver to a delivery
+router.put("/assign", authMiddleware, assignDriver);
+
+// Mark a delivery as delivered
+router.put("/deliver", authMiddleware, markAsDelivered);
 
 // Get all deliveries
-router.get("/", async (req, res) => {
-  try {
-    const deliveries = await Delivery.find();
-    res.json(deliveries);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.get("/", authMiddleware, getAllDeliveries);
 
-// Update delivery status
-router.put("/:id", async (req, res) => {
-  try {
-    const updatedDelivery = await Delivery.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updatedDelivery);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Update delivery status by driver
+router.put("/status", authMiddleware, updateDeliveryStatus);
 
 module.exports = router;
