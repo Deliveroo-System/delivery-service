@@ -100,8 +100,8 @@ exports.updateDeliveryStatus = async (req, res) => {
   try {
     const { deliveryId, status } = req.body;
 
-    if (!["Approved", "Rejected"].includes(status)) {
-      return res.status(400).json({ error: "Invalid status. Use 'Approved' or 'Rejected'." });
+    if (!["Approved", "Rejected", "On the Way", "Delivered"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status. Use 'Approved', 'Rejected', 'On the Way', or 'Delivered'." });
     }
 
     const delivery = await Delivery.findByIdAndUpdate(
