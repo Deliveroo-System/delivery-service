@@ -16,4 +16,5 @@ const deliverySchema = new mongoose.Schema({
   assignedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Driver", default: null },
 });
 
+
 module.exports = mongoose.model("Delivery", deliverySchema);
