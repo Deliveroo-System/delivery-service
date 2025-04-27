@@ -1,4 +1,5 @@
 const express = require("express");
+const router = express.Router(); // ✅ Declare router immediately
 
 const {
   createDelivery,
@@ -8,8 +9,6 @@ const {
   updateDeliveryStatus,
 } = require("../controllers/deliveryController");
 const authMiddleware = require("../middlewares/authMiddleware");
-
-const router = express.Router();
 
 // Create a new delivery
 router.post("/", authMiddleware, createDelivery);
