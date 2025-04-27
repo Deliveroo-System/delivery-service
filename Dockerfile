@@ -1,20 +1,27 @@
+# Use a slim, secure Node.js image
 FROM node:18-alpine
 
+# Set working directory
 WORKDIR /app
 
-# Copy package files first for layer caching
+# Only copy package.json and package-lock.json first for caching
 COPY package*.json ./
 
-# Install dependencies
+# Install production dependencies
 RUN npm ci --only=production
 
-# Copy all source files
+# Copy the rest of the source code
 COPY . .
 
-# Verify file structure (debugging)
-RUN ls -la && ls -la routes/
+# (Optional) Verify the file structure (for debugging only, you can remove this in final version)
+# RUN ls -la && ls -la routes/
 
+# Set environment variables (optional but useful)
+ENV NODE_ENV=production
+ENV PORT=5066
+
+# Expose the app port
 EXPOSE 5066
 
-# Start the server using your server.js
+# Start the app
 CMD ["node", "server.js"]

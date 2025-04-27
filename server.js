@@ -3,17 +3,16 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-
 const deliveryRoutes = require("./routes/deliveryRoutes");
 const driverRoutes = require("./routes/driverRoutes"); // ✅ Import driver routes
+const authRoutes = require("./routes/authRoutes");      // ✅ Import auth routes
 
 const http = require("http");
 const { Server } = require("socket.io");
 
-
-
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -26,13 +25,7 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose
-  .connect(process.env.MONGO_URI, {})
-
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.error(err));
-
-
+mongoose.connect(process.env.MONGO_URI, {})
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
@@ -54,7 +47,7 @@ app.use((req, res, next) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/deliveries", deliveryRoutes);
-
+app.use("/api/drivers", driverRoutes); // ✅ Use driver routes
 
 // Root endpoint
 app.get("/", (req, res) => {
