@@ -1,4 +1,31 @@
 const express = require("express");
+
+const {
+  createDelivery,
+  assignDriver,
+  markAsDelivered,
+  getAllDeliveries,
+  updateDeliveryStatus,
+} = require("../controllers/deliveryController");
+const authMiddleware = require("../middlewares/authMiddleware");
+
+const router = express.Router();
+
+// Create a new delivery
+router.post("/", authMiddleware, createDelivery);
+
+// Assign a driver to a delivery
+router.put("/assign", authMiddleware, assignDriver);
+
+// Mark a delivery as delivered
+router.put("/deliver", authMiddleware, markAsDelivered);
+
+// Get all deliveries
+router.get("/", authMiddleware, getAllDeliveries);
+
+// Update delivery status by driver
+router.put("/status", authMiddleware, updateDeliveryStatus);
+
 const Delivery = require("../models/Delivery");
 const User = require("../models/User");
 const { auth, authRole } = require("../middleware/authMiddleware");
@@ -66,5 +93,6 @@ router.put("/:id", auth, authRole("driver"), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 module.exports = router;

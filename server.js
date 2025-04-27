@@ -2,11 +2,15 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+
+
+const deliveryRoutes = require("./routes/deliveryRoutes");
+const driverRoutes = require("./routes/driverRoutes"); // ✅ Import driver routes
+
 const http = require("http");
 const { Server } = require("socket.io");
 
-const deliveryRoutes = require("./routes/deliveryRoutes");
-const authRoutes = require("./routes/authRoutes");
+
 
 const app = express();
 const server = http.createServer(app);
@@ -24,6 +28,11 @@ app.use(express.json());
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {})
+
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error(err));
+
+
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
@@ -46,6 +55,8 @@ app.use((req, res, next) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/deliveries", deliveryRoutes);
 
+
+// Root endpoint
 app.get("/", (req, res) => {
   res.send("🚚 Delivery Management Service is running...");
 });
