@@ -39,14 +39,14 @@ const loginDriver = async (req, res) => {
     const token = generateToken(driver.role, driver._id, driver.email);
 
     // Return the token and driver details
-    res.status(200).json({ 
-      token, 
+    res.status(200).json({
+      token,
       driver: {
         id: driver._id,
         name: driver.name,
         email: driver.email,
         role: driver.role,
-      }
+      },
     });
   } catch (error) {
     console.error("Login Error:", error);
@@ -54,7 +54,43 @@ const loginDriver = async (req, res) => {
   }
 };
 
+const getDriverById = async (req, res) => {
+  try {
+    const driver = await Driver.findById(req.params.id);
+    return res.status(200).json(driver);
+  } catch (error) {
+    return res.status(500).json({ error: "error " + error });
+  }
+};
+
+const updateDriverCities = async (req, res) => {
+  try {
+    const { cities } = req.body;
+    const driverId = req.params.id;
+
+    if (!Array.isArray(cities)) {
+      return res.status(400).json({ error: "Cities must be an array" });
+    }
+
+    const driver = await Driver.findByIdAndUpdate(
+      driverId,
+      { deliveryCities: cities },
+      { new: true }
+    );
+
+    if (!driver) {
+      return res.status(404).json({ error: "Driver not found" });
+    }
+
+    res.status(200).json(driver);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update driver cities" });
+  }
+};
+
 module.exports = {
   registerDriver,
   loginDriver,
+  getDriverById,
+  updateDriverCities, // Add this new export
 };

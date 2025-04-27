@@ -1,4 +1,13 @@
 const Delivery = require("../models/Delivery");
+const Driver = require("../models/driverModel");
+
+// Helper function to find available driver
+async function findAvailableDriver(city) {
+  return await Driver.findOne({
+    deliveryCities: city,
+    isAvailable: true
+  });
+}
 
 // Create a new delivery order
 exports.createDelivery = async (req, res) => {
@@ -8,7 +17,8 @@ exports.createDelivery = async (req, res) => {
       address, 
       items, 
       customerId, 
-      customerLocation, 
+      customerLocation,
+      city, // Add city field 
       restaurantId, 
       restaurantLocation 
     } = req.body;
@@ -22,6 +32,7 @@ exports.createDelivery = async (req, res) => {
       items.length === 0 || 
       !customerId || 
       !customerLocation || 
+      !city || // Validate city
       !restaurantId || 
       !restaurantLocation
     ) {
@@ -33,21 +44,34 @@ exports.createDelivery = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized. User information is missing." });
     }
 
+    // Find available driver for the city
+    const availableDriver = await findAvailableDriver(city);
+
     const delivery = new Delivery({
       customerName,
       address,
       items,
       customerId,
       customerLocation,
+      city,
       restaurantId,
       restaurantLocation,
-      createdBy: req.user.id, // Use authenticated user's ID
+      createdBy: req.user.id,
+      driver: availableDriver?._id,
+      status: availableDriver ? "Assigned" : "Pending",
     });
 
     await delivery.save();
+
+    // If driver was found, update their availability
+    if (availableDriver) {
+      availableDriver.isAvailable = false;
+      await availableDriver.save();
+    }
+
     res.status(201).json(delivery);
   } catch (error) {
-    console.error("Error creating delivery:", error); // Log the error for debugging
+    console.error("Error creating delivery:", error);
     res.status(500).json({ error: "Failed to create delivery" });
   }
 };
