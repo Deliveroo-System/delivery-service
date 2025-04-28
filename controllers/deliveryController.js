@@ -1,4 +1,13 @@
 const Delivery = require("../models/Delivery");
+const Driver = require("../models/driverModel");
+
+// Helper function to find available driver
+async function findAvailableDriver(city) {
+  return await Driver.findOne({
+    deliveryCities: city,
+    isAvailable: true
+  });
+}
 
 // Create a new delivery order
 exports.createDelivery = async (req, res) => {
@@ -8,7 +17,8 @@ exports.createDelivery = async (req, res) => {
       address, 
       items, 
       customerId, 
-      customerLocation, 
+      customerLocation,
+      city, // Add city field 
       restaurantId, 
       restaurantLocation 
     } = req.body;
@@ -22,6 +32,7 @@ exports.createDelivery = async (req, res) => {
       items.length === 0 || 
       !customerId || 
       !customerLocation || 
+      !city || // Validate city
       !restaurantId || 
       !restaurantLocation
     ) {
@@ -33,21 +44,34 @@ exports.createDelivery = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized. User information is missing." });
     }
 
+    // Find available driver for the city
+    const availableDriver = await findAvailableDriver(city);
+
     const delivery = new Delivery({
       customerName,
       address,
       items,
       customerId,
       customerLocation,
+      city,
       restaurantId,
       restaurantLocation,
-      createdBy: req.user.id, // Use authenticated user's ID
+      createdBy: req.user.id,
+      driver: availableDriver?._id,
+      status: availableDriver ? "Assigned" : "Pending",
     });
 
     await delivery.save();
+
+    // If driver was found, update their availability
+    if (availableDriver) {
+      availableDriver.isAvailable = false;
+      await availableDriver.save();
+    }
+
     res.status(201).json(delivery);
   } catch (error) {
-    console.error("Error creating delivery:", error); // Log the error for debugging
+    console.error("Error creating delivery:", error);
     res.status(500).json({ error: "Failed to create delivery" });
   }
 };
@@ -104,15 +128,39 @@ exports.updateDeliveryStatus = async (req, res) => {
       return res.status(400).json({ error: "Invalid status. Use 'Approved', 'Rejected', 'On the Way', or 'Delivered'." });
     }
 
-    const delivery = await Delivery.findByIdAndUpdate(
-      deliveryId,
-      { status },
-      { new: true }
-    );
-
+    // Get the delivery first to access its details
+    const delivery = await Delivery.findById(deliveryId);
     if (!delivery) return res.status(404).json({ error: "Delivery not found" });
+    
+    // Auto-assign driver if status is changing to "Approved" and no driver assigned yet
+    if (status === "Approved" && !delivery.driver) {
+      // Find available driver for the city
+      const availableDriver = await findAvailableDriver(delivery.city);
+      
+      if (availableDriver) {
+        delivery.driver = availableDriver._id;
+        delivery.status = "Assigned"; // Override to "Assigned" instead of "Approved"
+        delivery.assignedBy = req.user.id;
+        
+        // Update driver availability
+        availableDriver.isAvailable = false;
+        await availableDriver.save();
+        
+        console.log(`Auto-assigned driver ${availableDriver._id} to delivery ${deliveryId}`);
+      } else {
+        // If no driver found, set to Approved as requested
+        delivery.status = status;
+        console.log(`No available driver found for city ${delivery.city}`);
+      }
+    } else {
+      // Regular status update
+      delivery.status = status;
+    }
+    
+    await delivery.save();
     res.json(delivery);
   } catch (error) {
+    console.error("Status update error:", error);
     res.status(500).json({ error: "Failed to update delivery status" });
   }
 };

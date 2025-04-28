@@ -1,5 +1,6 @@
 const express = require("express");
-const { registerDriver, loginDriver,getDriverById } = require("../controllers/driverController");
+const { registerDriver, loginDriver, getDriverById, updateDriverCities } = require("../controllers/driverController");
+const authMiddleware = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
@@ -11,4 +12,10 @@ router.post("/login", loginDriver);
 
 router.get("/:id", getDriverById);
 
+// New route for updating cities
+router.put("/:id/cities", authMiddleware, updateDriverCities);
+
 module.exports = router;
+
+
+

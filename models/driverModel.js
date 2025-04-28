@@ -18,9 +18,17 @@ const driverSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ["driver", "admin"], // Example roles
+    enum: ["driver", "admin"],
     default: "driver",
   },
+  deliveryCities: [{
+    type: String,
+    required: true
+  }],
+  isAvailable: {
+    type: Boolean,
+    default: true
+  }
 });
 
 // Hash password before saving
