@@ -16,7 +16,7 @@ COPY . .
 # (Optional) Verify the file structure (for debugging only, you can remove this in final version)
 # RUN ls -la && ls -la routes/
 
-# Set environment variables (optional but useful)
+
 ENV NODE_ENV=production
 ENV PORT=5066
 
