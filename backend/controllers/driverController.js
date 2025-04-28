@@ -3,18 +3,25 @@ const { generateToken } = require("../utils/tokenGenerator"); // ✅ Import your
 
 const registerDriver = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, deliveryCities } = req.body;
 
     const existingDriver = await Driver.findOne({ email });
     if (existingDriver) {
       return res.status(400).json({ error: "Driver already exists." });
     }
 
-    const driver = new Driver({ name, email, password, role });
+    const driver = new Driver({ 
+      name, 
+      email, 
+      password, 
+      role,
+      deliveryCities: deliveryCities || [] 
+    });
     await driver.save();
 
     res.status(201).json({ message: "Driver registered successfully." });
   } catch (error) {
+    console.error("Registration error:", error);
     res.status(500).json({ error: "Internal server error." });
   }
 };
