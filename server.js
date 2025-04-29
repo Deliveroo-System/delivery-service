@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 const deliveryRoutes = require("./routes/deliveryRoutes");
-const driverRoutes = require("./routes/driverRoutes"); // ✅ Import driver routes
+const driverRoutes = require("./routes/driverRoutes"); // ✅ Import driver route
 
 const app = express();
 
