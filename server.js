@@ -19,7 +19,7 @@ mongoose
 
 // Routes
 app.use("/api/deliveries", deliveryRoutes);
-app.use("/api/drivers", driverRoutes); // ✅ Mount driver auth routes
+app.use("/api/drivers", driverRoutes); // ✅ Mount driver auth route
 
 // Root endpoint
 app.get("/", (req, res) => {
